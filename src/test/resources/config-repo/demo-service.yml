@@ -1,0 +1,8 @@
+spring:
+  config:
+    activate:
+      on-profile: env1-docker | env2-docker
+demo:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    host: db.example.com

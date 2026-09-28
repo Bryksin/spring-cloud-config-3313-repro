@@ -1,0 +1,49 @@
+// Reproducer for https://github.com/spring-cloud/spring-cloud-config/issues/3313
+plugins {
+    id 'org.springframework.boot' version '4.1.1'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'java'
+}
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+
+// Runs on any JDK 17+.
+tasks.withType(JavaCompile).configureEach {
+    options.release = 17
+}
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    set('springCloudVersion', '2025.1.3')
+}
+
+dependencies {
+    implementation 'org.springframework.cloud:spring-cloud-config-server'
+    implementation platform('software.amazon.awssdk:bom:2.55.6')
+    implementation 'software.amazon.awssdk:s3'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    // The config client, used by the tests to show what an application actually ends up with.
+    testImplementation 'org.springframework.cloud:spring-cloud-config-client'
+    testImplementation 'org.testcontainers:testcontainers-junit-jupiter'
+    testImplementation 'org.testcontainers:testcontainers-localstack'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    testLogging {
+        events 'passed', 'failed'
+        exceptionFormat = 'full'
+    }
+}
